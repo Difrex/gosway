@@ -6,25 +6,25 @@ import (
 )
 
 type Tree struct {
-	ID                 int           `json:"id"`
-	Name               string        `json:"name"`
-	Rect               Rect          `json:"rect"`
-	Focused            bool          `json:"focused"`
-	Focus              []int         `json:"focus"`
-	Border             string        `json:"border"`
-	CurrentBorderWidth int           `json:"current_border_width"`
-	Layout             string        `json:"layout"`
-	Orientation        string        `json:"orientation"`
-	Percent            interface{}   `json:"percent"`
-	WindowRect         WindowRect    `json:"window_rect"`
-	DecoRect           DecoRect      `json:"deco_rect"`
-	Geometry           Geometry      `json:"geometry"`
-	Window             interface{}   `json:"window"`
-	Urgent             bool          `json:"urgent"`
-	FloatingNodes      []interface{} `json:"floating_nodes"`
-	Sticky             bool          `json:"sticky"`
-	Type               string        `json:"type"`
-	Nodes              []Node        `json:"nodes"`
+	ID                 int         `json:"id"`
+	Name               string      `json:"name"`
+	Rect               Rect        `json:"rect"`
+	Focused            bool        `json:"focused"`
+	Focus              []int       `json:"focus"`
+	Border             string      `json:"border"`
+	CurrentBorderWidth int         `json:"current_border_width"`
+	Layout             string      `json:"layout"`
+	Orientation        string      `json:"orientation"`
+	Percent            float64     `json:"percent"`
+	WindowRect         WindowRect  `json:"window_rect"`
+	DecoRect           DecoRect    `json:"deco_rect"`
+	Geometry           Geometry    `json:"geometry"`
+	Window             interface{} `json:"window"`
+	Urgent             bool        `json:"urgent"`
+	FloatingNodes      []Node      `json:"floating_nodes"`
+	Sticky             bool        `json:"sticky"`
+	Type               string      `json:"type"`
+	Nodes              []Node      `json:"nodes"`
 }
 
 func (sc *SwayConnection) FindParent(id int64) Node {
@@ -68,7 +68,7 @@ func FindFocusedNodes(tree []Node, ch chan Node) {
 func (sc *SwayConnection) GetTree() (*Tree, error) {
 	tree := &Tree{}
 
-	data, err := sc.SendCommand(int(sc.SWAY_IPC_GET_TREE))
+	data, err := sc.SendCommand(IPC_GET_TREE, "get_tree")
 	if err != nil {
 		return nil, err
 	}
@@ -127,13 +127,13 @@ type FloatingNodes struct {
 	CurrentBorderWidth int              `json:"current_border_width"`
 	Layout             string           `json:"layout"`
 	Orientation        string           `json:"orientation"`
-	Percent            interface{}      `json:"percent"`
+	Percent            float64          `json:"percent"`
 	WindowRect         WindowRect       `json:"window_rect"`
 	DecoRect           DecoRect         `json:"deco_rect"`
 	Geometry           Geometry         `json:"geometry"`
 	Window             int              `json:"window"`
 	Urgent             bool             `json:"urgent"`
-	FloatingNodes      []interface{}    `json:"floating_nodes"`
+	FloatingNodes      []FloatingNodes  `json:"floating_nodes"`
 	Sticky             bool             `json:"sticky"`
 	Type               string           `json:"type"`
 	FullscreenMode     int              `json:"fullscreen_mode"`
@@ -158,33 +158,34 @@ type CurrentMode struct {
 }
 
 type Node struct {
-	ID                 int64         `json:"id"`
-	Name               string        `json:"name"`
-	Rect               Rect          `json:"rect"`
-	Focused            bool          `json:"focused"`
-	Focus              []int         `json:"focus"`
-	Border             string        `json:"border"`
-	CurrentBorderWidth int           `json:"current_border_width"`
-	Layout             string        `json:"layout"`
-	Orientation        string        `json:"orientation"`
-	Percent            interface{}   `json:"percent"`
-	WindowRect         WindowRect    `json:"window_rect"`
-	DecoRect           DecoRect      `json:"deco_rect"`
-	Geometry           Geometry      `json:"geometry"`
-	Window             interface{}   `json:"window"`
-	Urgent             bool          `json:"urgent"`
-	FloatingNodes      []interface{} `json:"floating_nodes"`
-	Sticky             bool          `json:"sticky"`
-	Type               string        `json:"type"`
-	Nodes              []Node        `json:"nodes"`
-	Active             bool          `json:"active,omitempty"`
-	Primary            bool          `json:"primary,omitempty"`
-	Make               string        `json:"make,omitempty"`
-	Model              string        `json:"model,omitempty"`
-	Serial             string        `json:"serial,omitempty"`
-	Scale              float64       `json:"scale,omitempty"`
-	Transform          string        `json:"transform,omitempty"`
-	CurrentWorkspace   string        `json:"current_workspace,omitempty"`
-	Modes              []Modes       `json:"modes,omitempty"`
-	CurrentMode        CurrentMode   `json:"current_mode,omitempty"`
+	ID                 int64           `json:"id"`
+	Name               string          `json:"name"`
+	Rect               Rect            `json:"rect"`
+	Focused            bool            `json:"focused"`
+	Focus              []int           `json:"focus"`
+	Border             string          `json:"border"`
+	CurrentBorderWidth int             `json:"current_border_width"`
+	Layout             string          `json:"layout"`
+	Orientation        string          `json:"orientation"`
+	Percent            float64         `json:"percent"`
+	WindowRect         WindowRect      `json:"window_rect"`
+	DecoRect           DecoRect        `json:"deco_rect"`
+	Geometry           Geometry        `json:"geometry"`
+	Window             interface{}     `json:"window"`
+	Urgent             bool            `json:"urgent"`
+	FloatingNodes      []FloatingNodes `json:"floating_nodes"`
+	Sticky             bool            `json:"sticky"`
+	Type               string          `json:"type"`
+	Nodes              []Node          `json:"nodes"`
+	Active             bool            `json:"active,omitempty"`
+	Primary            bool            `json:"primary,omitempty"`
+	Make               string          `json:"make,omitempty"`
+	Model              string          `json:"model,omitempty"`
+	Serial             string          `json:"serial,omitempty"`
+	Scale              float64         `json:"scale,omitempty"`
+	Transform          string          `json:"transform,omitempty"`
+	CurrentWorkspace   string          `json:"current_workspace,omitempty"`
+	Modes              []Modes         `json:"modes,omitempty"`
+	CurrentMode        CurrentMode     `json:"current_mode,omitempty"`
+	Representation     string          `json:"representation,omitempty"`
 }

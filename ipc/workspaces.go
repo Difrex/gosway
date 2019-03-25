@@ -5,7 +5,7 @@ import (
 )
 
 type Workspace struct {
-	ID                 int           `json:"id"`
+	ID                 int64         `json:"id"`
 	Name               string        `json:"name"`
 	Rect               Rect          `json:"rect"`
 	Focus              []int         `json:"focus"`
@@ -33,7 +33,7 @@ type Workspace struct {
 func (sc *SwayConnection) GetWorkspaces() ([]*Workspace, error) {
 	var workspaces []*Workspace
 
-	ws, err := sc.SendCommand(int(sc.SWAY_IPC_GET_WORKSPACES))
+	ws, err := sc.SendCommand(IPC_GET_WORKSPACES, "get_workspaces")
 	if err != nil {
 		return workspaces, err
 	}

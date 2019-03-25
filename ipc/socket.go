@@ -1,6 +1,7 @@
 package ipc
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
@@ -29,6 +30,18 @@ const (
 	// string, 4 for the length of the payload (int32 in native byte order) and
 	// another 4 for the message type (also int32 in NBO).
 	HEADERLEN = 14
+
+	IPC_GET_WORKSPACES    = 1
+	IPC_SUBSCRIBE         = 2
+	IPC_GET_OUTPUTS       = 3
+	IPC_GET_TREE          = 4
+	IPC_GET_MARKS         = 5
+	IPC_GET_BAR_CONFIG    = 6
+	IPC_GET_VERSION       = 7
+	IPC_GET_BINDING_MODES = 8
+	IPC_GET_CONFIG        = 9
+	IPC_SEND_TICK         = 10
+	IPC_SYNC              = 11
 )
 
 type SwayConnection struct {
@@ -47,8 +60,27 @@ type SwayConnection struct {
 }
 
 // SendCommand sends command to the Sway unix socket
-func (sc *SwayConnection) SendCommand(command int) ([]byte, error) {
-	return sc.raw(command, "get_tree")
+func (sc *SwayConnection) SendCommand(command int, s string) ([]byte, error) {
+	return sc.raw(command, s)
+}
+
+func (sc *SwayConnection) SubscribeListener(ch chan *Event) {
+	for {
+		var event *Event
+		o, err := sc.readSwayResponse()
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		err = json.Unmarshal(o, &event)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+
+		ch <- event
+	}
 }
 
 func (sc *SwayConnection) raw(messageType int, args string) ([]byte, error) {

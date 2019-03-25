@@ -1,5 +1,9 @@
 package ipc
 
+import (
+	"encoding/json"
+)
+
 type Output struct {
 	ID                 int           `json:"id,omitempty"`
 	Name               string        `json:"name"`
@@ -29,4 +33,27 @@ type Output struct {
 	Modes              []Modes       `json:"modes"`
 	CurrentMode        CurrentMode   `json:"current_mode,omitempty"`
 	Focused            bool          `json:"focused,omitempty"`
+}
+
+func (sc *SwayConnection) GetActiveOutput() (*Output, error) {
+	var output *Output
+	var o []*Output
+	os, err := sc.SendCommand(IPC_GET_OUTPUTS, "get_ouputs")
+	if err != nil {
+		return output, err
+	}
+
+	err = json.Unmarshal(os, &o)
+	if err != nil {
+		return output, err
+	}
+
+	for i, _ := range o {
+		if o[i].Focused {
+			output = o[i]
+			break
+		}
+	}
+
+	return output, nil
 }
