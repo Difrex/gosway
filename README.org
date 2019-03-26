@@ -1,0 +1,86 @@
+* GoSway
+
+Golang [[https://github.com/swaywm/sway][Sway]] IPC bindings and autotiling daemon.
+
+* ipc
+
+** Install
+
+#+begin_src
+go get github.com/Difrex/gosway/ipc
+#+end_src
+
+** Usage
+
+Initialize an new connection to the Sway socket
+#+begin_src go
+import (
+	"github.com/Difrex/gosway/ipc"
+)
+
+sc, err := ipc.NewSwayConnection()
+if err != nil {
+    panic(err)
+}
+#+end_src
+
+*** Workspaces
+
+Workspaces list
+#+begin_src go
+ws, err := sc.GetWorkspaces()
+if err != nil {
+    panic(err)
+}
+
+for _, workspace := range ws {
+    fmt.Println(workspace.Name)
+}
+#+end_src
+
+Get focused workspace
+#+begin_src go
+ws, err := sc.GetFocusedWorkspace()
+if err != nil {
+    panic(err)
+}
+#+end_src
+
+Get focused workspace windows
+#+begin_src go
+windows, err := sc.GetFocusedWorkspaceWindows()
+if err != nil {
+    panic(err)
+}
+for _, window := range windows {
+    fmt.Println(window.Name)
+}
+#+end_src
+
+** Events subscribe
+
+You needs a connection for sending command to the Sway and another one for events listener.
+
+#+begin_src go
+  commandConn, err := ipc.NewSwayConnection()
+  if err != nil {
+      panic(err)
+  }
+
+  listenerConn, err := ipc.NewSwayConnection()
+  if err != nil {
+      panic(err)
+  }
+
+  // Run a listener
+  ch := make(chan *ipc.Event)
+  go subCon.SubscribeListener(ch)
+
+  for {
+      event := <-ch
+      if event.Change == "new" {
+          commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
+          commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
+      }
+  }
+#+end_src
