@@ -8,35 +8,27 @@ import (
 )
 
 func main() {
-	sc, err := ipc.NewSwayConnection()
+
+	manager, err := newManager()
 	if err != nil {
 		panic(err)
 	}
 
-	subCon, err := ipc.NewSwayConnection()
-	if err != nil {
-		panic(err)
-	}
-	o, err := subCon.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
+	defer manager.store.dbConn.Close()
+
+	o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(string(o))
 
 	ch := make(chan *ipc.Event)
-	go subCon.SubscribeListener(ch)
+	go manager.listenerConn.SubscribeListener(ch)
 
 	for {
 		event := <-ch
 		if event.Change == "new" {
-			fmt.Println("New window is created, containerID: ", event.Container.ID, " geometry: ", event.Container.Geometry)
-			swaymsg(fmt.Sprintf("[con_id=%d] split v", event.Container.ID))
-			swaymsg(fmt.Sprintf("[con_id=%d] move up", event.Container.ID))
-			windows, err := sc.GetFocusedWorkspaceWindows()
-			if err != nil {
-				panic(err)
-			}
-			fmt.Println(len(windows))
+			manager.layouts["spiral"].PlaceWindow(event)
 		}
 	}
 	// tree, _ := sc.GetTree()
