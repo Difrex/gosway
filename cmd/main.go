@@ -26,6 +26,12 @@ func main() {
 	go manager.listenerConn.SubscribeListener(ch)
 
 	for {
+		o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
+		if err != nil {
+			panic(err)
+		}
+		fmt.Println(string(o))
+
 		event := <-ch
 		if event.Change == "new" {
 			manager.layouts["spiral"].PlaceWindow(event)

@@ -20,24 +20,26 @@ func NewSpiralLayout(conn *ipc.SwayConnection, store *store) *SpiralLayout {
 }
 
 func (s *SpiralLayout) PlaceWindow(event *ipc.Event) error {
-	tree, err := s.Conn.GetTree()
+	nodes, err := s.Conn.GetFocusedWorkspaceWindows()
 	if err != nil {
 		return err
 	}
-
-	ch := make(chan ipc.Node)
-	go ipc.FindFocusedNodes(tree.Nodes, ch)
-
-	result := <-ch
+	var result ipc.Node
+	for _, node := range nodes {
+		if node.Focused {
+			result = node
+			break
+		}
+	}
 
 	if result.WindowRect.Width > result.WindowRect.Height {
-		swaymsg(fmt.Sprintf("[con_id=%d] split h", result.ID))
+		swaymsg(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
 		if len(os.Args) > 1 {
 			fmt.Println(os.Args)
 			// execCMD(os.Args[1], os.Args[1:]...)
 		}
 	} else {
-		swaymsg(fmt.Sprintf("[con_id=%d] split v", result.ID))
+		swaymsg(fmt.Sprintf("[con_id=%d] split v", event.Container.ID))
 		if len(os.Args) > 1 {
 			fmt.Println(os.Args)
 			// execCMD(os.Args[1], os.Args[1:]...)
