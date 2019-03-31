@@ -6,7 +6,8 @@ import (
 
 type Layout interface {
 	PlaceWindow(*ipc.Event) error
-	Change() error
+	Manage() error
+	Unmanage() error
 }
 
 func NewLayouts(conn *ipc.SwayConnection, store *store) map[string]Layout {

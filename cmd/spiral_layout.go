@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/Difrex/gosway/ipc"
 )
@@ -33,23 +32,36 @@ func (s *SpiralLayout) PlaceWindow(event *ipc.Event) error {
 	}
 
 	if result.WindowRect.Width > result.WindowRect.Height {
-		swaymsg(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
-		if len(os.Args) > 1 {
-			fmt.Println(os.Args)
-			// execCMD(os.Args[1], os.Args[1:]...)
-		}
+		_, err := s.Conn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
+		return err
 	} else {
-		swaymsg(fmt.Sprintf("[con_id=%d] split v", event.Container.ID))
-		if len(os.Args) > 1 {
-			fmt.Println(os.Args)
-			// execCMD(os.Args[1], os.Args[1:]...)
-		}
+		_, err := s.Conn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split v", event.Container.ID))
+		return err
 	}
 
 	return nil
 }
 
-func (s *SpiralLayout) Change() error {
+func (s *SpiralLayout) Unmanage() error {
+	ws, err := s.Conn.GetFocusedWorkspace()
+	if err != nil {
+		return err
+	}
+
+	wc := WorkspaceConfig{
+		Name:    ws.Name,
+		Layout:  "spiral",
+		Managed: false,
+	}
+
+	if err := s.store.put([]byte(ws.Name), wc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *SpiralLayout) Manage() error {
 	ws, err := s.Conn.GetFocusedWorkspace()
 	if err != nil {
 		return err

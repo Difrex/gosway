@@ -1,42 +1,51 @@
 package main
 
 import (
-	"fmt"
 	"os/exec"
-
-	"github.com/Difrex/gosway/ipc"
+	"strconv"
+	"time"
 )
 
 func main() {
 
-	manager, err := newManager()
-	if err != nil {
-		panic(err)
+	go ListenCTL()
+
+	time.Sleep(time.Second * 1)
+
+	for i := 0; i < 15; i++ {
+		SendToCTL("Return OK: " + strconv.Itoa(i))
+		time.Sleep(time.Second * 1)
 	}
 
-	defer manager.store.dbConn.Close()
+	// manager, err := newManager()
+	// if err != nil {
+	// 	panic(err)
+	// }
 
-	o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
-	if err != nil {
-		panic(err)
-	}
-	fmt.Println(string(o))
+	// defer manager.store.dbConn.Close()
 
-	ch := make(chan *ipc.Event)
-	go manager.listenerConn.SubscribeListener(ch)
+	// o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
+	// if err != nil {
+	// 	panic(err)
+	// }
+	// fmt.Println(string(o))
 
-	for {
-		o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
-		if err != nil {
-			panic(err)
-		}
-		fmt.Println(string(o))
+	// ch := make(chan *ipc.Event)
+	// go manager.listenerConn.SubscribeListener(ch)
 
-		event := <-ch
-		if event.Change == "new" {
-			manager.layouts["spiral"].PlaceWindow(event)
-		}
-	}
+	// for {
+	// 	// o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
+	// 	// if err != nil {
+	// 	// 	panic(err)
+	// 	// }
+	// 	// fmt.Println(string(o))
+
+	// 	event := <-ch
+	// 	if event.Change == "new" {
+	// 		fmt.Println(event)
+	// 		manager.layouts["spiral"].PlaceWindow(event)
+	// 	}
+	// }
 	// tree, _ := sc.GetTree()
 
 	// ch := make(chan ipc.Node)

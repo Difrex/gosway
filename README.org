@@ -62,25 +62,25 @@ for _, window := range windows {
 You needs a connection for sending command to the Sway and another one for events listener.
 
 #+begin_src go
-  commandConn, err := ipc.NewSwayConnection()
-  if err != nil {
-      panic(err)
-  }
+commandConn, err := ipc.NewSwayConnection()
+if err != nil {
+    panic(err)
+}
 
-  listenerConn, err := ipc.NewSwayConnection()
-  if err != nil {
-      panic(err)
-  }
+listenerConn, err := ipc.NewSwayConnection()
+if err != nil {
+    panic(err)
+}
 
-  // Run a listener
-  ch := make(chan *ipc.Event)
-  go subCon.SubscribeListener(ch)
+// Run a listener
+ch := make(chan *ipc.Event)
+go subCon.SubscribeListener(ch)
 
-  for {
-      event := <-ch
-      if event.Change == "new" {
-          commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
-          commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
-      }
-  }
+for {
+    event := <-ch
+    if event.Change == "new" {
+        commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
+        commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
+    }
+}
 #+end_src
