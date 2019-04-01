@@ -42,25 +42,6 @@ func (s *SpiralLayout) PlaceWindow(event *ipc.Event) error {
 	return nil
 }
 
-func (s *SpiralLayout) Unmanage() error {
-	ws, err := s.Conn.GetFocusedWorkspace()
-	if err != nil {
-		return err
-	}
-
-	wc := WorkspaceConfig{
-		Name:    ws.Name,
-		Layout:  "spiral",
-		Managed: false,
-	}
-
-	if err := s.store.put([]byte(ws.Name), wc); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (s *SpiralLayout) Manage() error {
 	ws, err := s.Conn.GetFocusedWorkspace()
 	if err != nil {

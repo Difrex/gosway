@@ -45,24 +45,29 @@ func newManager() (*manager, error) {
 	return manager, nil
 }
 
-func (m *manager) isWorkspaceManaged() (bool, error) {
+func (m *manager) getCurrentWorkspaceConfig() *WorkspaceConfig {
+	config, _ := m.isWorkspaceManaged()
+	return config
+}
+
+func (m *manager) isWorkspaceManaged() (*WorkspaceConfig, bool) {
 	var managed bool
-	var config WorkspaceConfig
+	config := &WorkspaceConfig{}
 
 	ws, err := m.commandConn.GetFocusedWorkspace()
 	if err != nil {
-		return managed, err
+		return config, managed
 	}
 
 	data, err := m.store.get([]byte(ws.Name))
 	if err != nil {
-		return managed, nil
+		return config, managed
 	}
 
 	err = json.Unmarshal(data, &config)
 	if err != nil {
-		return managed, nil
+		return config, managed
 	}
 
-	return config.Managed, nil
+	return config, config.Managed
 }

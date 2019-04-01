@@ -2,37 +2,100 @@ package main
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"net"
+	"os"
 	"os/user"
+	"strings"
 )
 
-func ListenCTL() {
-	ln, err := net.Listen("tcp", "127.0.0.1:7877")
+const (
+	SOCK_FILE = "/tmp/swaymgr.sock"
+)
+
+func (m *manager) ctlCallback(callback string) string {
+	ctl := strings.Split(strings.Trim(callback, "\n"), " ")
+	if len(ctl) < 2 {
+		return "error: wrong command length"
+	}
+
+	switch ctl[0] {
+	case "set":
+		if ctl[1] == "manual" {
+			if err := m.Unmanage(); err != nil {
+				return "error: " + err.Error()
+			}
+			break
+		}
+		if _, ok := m.layouts[ctl[1]]; !ok {
+			return "warning: unsupported layout " + ctl[1]
+		}
+		err := m.layouts[ctl[1]].Manage()
+		if err != nil {
+			return fmt.Sprintf("error: %s", err.Error())
+		}
+	case "get":
+		if ctl[1] == "layout" {
+			wsConfig := m.getCurrentWorkspaceConfig()
+			data, err := json.Marshal(wsConfig)
+			if err != nil {
+				return "error: " + err.Error()
+			}
+			return string(data)
+		} else {
+			return "warning: unsupported command " + ctl[1]
+		}
+	default:
+		return "warning: unsupported command " + ctl[0]
+	}
+
+	return "success: ok"
+}
+
+func (m *manager) ListenCTL() {
+	ln, err := net.Listen("unix", SOCK_FILE)
 	if err != nil {
 		panic(err)
 	}
+
+	defer ln.Close()
 
 	for {
 		conn, err := ln.Accept()
 		if err != nil {
 			panic(err)
 		}
+
 		s, err := bufio.NewReader(conn).ReadString('\n')
 		if err != nil {
 			panic(err)
 		}
-		fmt.Println(s)
+
+		callbackResponse := m.ctlCallback(s)
+
+		fmt.Fprintf(conn, "%s\n", callbackResponse)
+
+		err = conn.Close()
+		if err != nil {
+			panic(err)
+		}
 	}
 }
 
 func SendToCTL(cmd string) {
-	conn, err := net.Dial("tcp", "127.0.0.1:7877")
+	conn, err := net.Dial("unix", SOCK_FILE)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Fprintf(conn, cmd+"\n")
 	defer conn.Close()
+
+	s, err := bufio.NewReader(conn).ReadString('\n')
+	if err != nil {
+		panic(err)
+	}
+	fmt.Print(s)
 }
 
 func userID() string {
@@ -41,4 +104,8 @@ func userID() string {
 		panic(err)
 	}
 	return user.Uid
+}
+
+func cleanUpSocket() error {
+	return os.Remove(SOCK_FILE)
 }

@@ -104,5 +104,14 @@ func (s *store) createDB() error {
 	}
 	defer db.Close()
 
-	return nil
+	err = db.Update(func(tx *bolt.Tx) error {
+		_, err := tx.CreateBucketIfNotExists([]byte(BUCKET_NAME))
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	return err
 }
