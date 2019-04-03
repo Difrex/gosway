@@ -85,3 +85,17 @@ func findWindows(n []Node) []Node {
 
 	return nodes
 }
+
+// GetLargestWindow returns largest window ID
+func GetLargestWindowID(n []Node) int64 {
+	var id int64
+	var max int
+	for i, _ := range n {
+		if (n[i].Rect.Height + n[i].Rect.Width) > max {
+			max = n[i].Rect.Height + n[i].Rect.Width
+			id = n[i].ID
+		}
+	}
+
+	return id
+}

@@ -46,11 +46,11 @@ func main() {
 	// Currently, we can process only the "new" type events
 	for {
 		event := <-ch
+		fmt.Println(event.Change)
 		if event.Change == "new" {
 			// Places new window only if the active workspace is managed by the swaymgr
 			wsConfig, isManaged := manager.isWorkspaceManaged()
 			if isManaged {
-				fmt.Println(event)
 				manager.layouts[wsConfig.Layout].PlaceWindow(event)
 			}
 		}

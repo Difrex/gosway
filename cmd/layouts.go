@@ -19,7 +19,9 @@ func NewLayouts(conn *ipc.SwayConnection, store *store) map[string]Layout {
 	layouts := make(map[string]Layout)
 
 	spiral := Layout(NewSpiralLayout(conn, store))
+	left := Layout(NewLeftLayout(conn, store))
 	layouts["spiral"] = spiral
+	layouts["left"] = left
 
 	return layouts
 }
@@ -47,5 +49,4 @@ func (m *manager) Unmanage() error {
 type FiberLayout struct{}
 type TopLayout struct{}
 type BottomLayout struct{}
-type LeftLayout struct{}
 type RightLayout struct{}
