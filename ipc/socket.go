@@ -5,21 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"net"
+	"os"
 	"strings"
 	"unsafe"
 )
-
-type SWAY_IPC_GET_WORKSPACES int
-type SWAY_IPC_SUBSCRIBE int
-type SWAY_IPC_GET_OUTPUTS int
-type SWAY_IPC_GET_TREE int
-type SWAY_IPC_GET_MARKS int
-type SWAY_IPC_GET_BAR_CONFIG int
-type SWAY_IPC_GET_VERSION int
-type SWAY_IPC_GET_BINDING_MODES int
-type SWAY_IPC_GET_CONFIG int
-type SWAY_IPC_SEND_TICK int
-type SWAY_IPC_SYNC int
 
 // raw and readSwayResponse inspired in github.com/mdirkse/i3ipc-go
 
@@ -46,17 +35,6 @@ const (
 
 type SwayConnection struct {
 	Conn net.Conn
-	SWAY_IPC_GET_WORKSPACES
-	SWAY_IPC_SUBSCRIBE
-	SWAY_IPC_GET_OUTPUTS
-	SWAY_IPC_GET_TREE
-	SWAY_IPC_GET_MARKS
-	SWAY_IPC_GET_BAR_CONFIG
-	SWAY_IPC_GET_VERSION
-	SWAY_IPC_GET_BINDING_MODES
-	SWAY_IPC_GET_CONFIG
-	SWAY_IPC_SEND_TICK
-	SWAY_IPC_SYNC
 }
 
 // SendCommand sends command to the Sway unix socket
@@ -64,6 +42,7 @@ func (sc *SwayConnection) SendCommand(command int, s string) ([]byte, error) {
 	return sc.raw(command, s)
 }
 
+// SubscribeListener listens events from the Sway
 func (sc *SwayConnection) SubscribeListener(ch chan *Event) {
 	for {
 		var event *Event
@@ -173,18 +152,6 @@ func NewSwayConnection() (*SwayConnection, error) {
 		return swayConn, err
 	}
 
-	swayConn.SWAY_IPC_GET_WORKSPACES = 1
-	swayConn.SWAY_IPC_SUBSCRIBE = 2
-	swayConn.SWAY_IPC_GET_OUTPUTS = 3
-	swayConn.SWAY_IPC_GET_TREE = 4
-	swayConn.SWAY_IPC_GET_MARKS = 5
-	swayConn.SWAY_IPC_GET_BAR_CONFIG = 6
-	swayConn.SWAY_IPC_GET_VERSION = 7
-	swayConn.SWAY_IPC_GET_BINDING_MODES = 8
-	swayConn.SWAY_IPC_GET_CONFIG = 9
-	swayConn.SWAY_IPC_SEND_TICK = 10
-	swayConn.SWAY_IPC_SYNC = 11
-
 	swayConn.Conn = conn
 	return swayConn, nil
 }
@@ -195,6 +162,12 @@ func GetSocketPath() (string, error) {
 	if !checkSway() {
 		return path, errors.New("Not under the wayland or the Sway executable not found")
 	}
+
+	swaysock := os.Getenv("SWAYSOCK")
+	if swaysock != "" {
+		return swaysock, nil
+	}
+
 	path, err := runSwayCMD("--get-socketpath")
 	if err != nil {
 		return "", err
@@ -203,7 +176,7 @@ func GetSocketPath() (string, error) {
 	return strings.TrimRight(path, "\n"), nil
 }
 
-// ConnectToSocket connects to the Wayland socket
+// ConnectToSocket connects to the Sway socket
 func ConnectToSocket() (net.Conn, error) {
 	var conn net.Conn
 	path, err := GetSocketPath()

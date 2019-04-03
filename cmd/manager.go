@@ -19,6 +19,8 @@ type WorkspaceConfig struct {
 	Managed bool   `json:"managed"`
 }
 
+// newManager opens a DB connection, initializes listener and command
+// sockets and layouts interface
 func newManager() (*manager, error) {
 	manager := &manager{}
 
@@ -45,11 +47,15 @@ func newManager() (*manager, error) {
 	return manager, nil
 }
 
+// getCurrentWorkspaceConfig returns currently focused workspace configuration
+// from the database
 func (m *manager) getCurrentWorkspaceConfig() *WorkspaceConfig {
 	config, _ := m.isWorkspaceManaged()
 	return config
 }
 
+// isWorkspaceManaged returns currently focused workspace configuration
+// and true if the workspace managed by swaymgr
 func (m *manager) isWorkspaceManaged() (*WorkspaceConfig, bool) {
 	var managed bool
 	config := &WorkspaceConfig{}

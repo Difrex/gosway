@@ -2,11 +2,13 @@ package ipc
 
 type ChangeEvent string
 
+// Event represents a Sway event
 type Event struct {
 	Change    ChangeEvent `json:"change"`
 	Container Container   `json:"container"`
 }
 
+// Container represents the Sway container
 type Container struct {
 	ID                 int              `json:"id"`
 	Name               string           `json:"name"`
@@ -35,6 +37,7 @@ type Container struct {
 	Nodes              []Node           `json:"nodes"`
 }
 
+// GetFocusedWorkspaceWindows returns all the windows from the focused workspace
 func (sc *SwayConnection) GetFocusedWorkspaceWindows() ([]Node, error) {
 	var nodes []Node
 
@@ -66,6 +69,7 @@ func (sc *SwayConnection) GetFocusedWorkspaceWindows() ([]Node, error) {
 	return nodes, nil
 }
 
+// findWindows recusive finding a windows
 func findWindows(n []Node) []Node {
 	var nodes []Node
 

@@ -2,9 +2,9 @@ package ipc
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
+// Tree is a structure that we getting from `get_tree'
 type Tree struct {
 	ID                 int         `json:"id"`
 	Name               string      `json:"name"`
@@ -27,6 +27,7 @@ type Tree struct {
 	Nodes              []Node      `json:"nodes"`
 }
 
+// FindParent returns the parent node of the provided node ID
 func (sc *SwayConnection) FindParent(id int64) Node {
 	tree, _ := sc.GetTree()
 	var result []Node
@@ -36,6 +37,7 @@ func (sc *SwayConnection) FindParent(id int64) Node {
 	return parent[0]
 }
 
+// finder recursive finds a top level node
 func finder(result, n []Node, p Node, id int64) []Node {
 	if len(result) > 0 {
 		return result
@@ -52,19 +54,19 @@ func finder(result, n []Node, p Node, id int64) []Node {
 	return n
 }
 
+// FindFocusedNodes finds the all focused nodes and send it to the channel
 func FindFocusedNodes(tree []Node, ch chan Node) {
 	for _, node := range tree {
 		if len(node.Nodes) > 0 {
-			fmt.Println("Recurse call")
 			FindFocusedNodes(node.Nodes, ch)
 		}
 		if node.Focused {
-			fmt.Println("Got focused node id", node.ID)
 			ch <- node
 		}
 	}
 }
 
+// GetTree calls get_tree through a unix socket and return the Tree
 func (sc *SwayConnection) GetTree() (*Tree, error) {
 	tree := &Tree{}
 

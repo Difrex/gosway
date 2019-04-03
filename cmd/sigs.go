@@ -7,6 +7,7 @@ import (
 	"syscall"
 )
 
+// sigWait waits a unix SYSCALL
 func sigWait() {
 	sigs := make(chan os.Signal)
 	signal.Notify(sigs, syscall.SIGTERM, syscall.SIGQUIT, syscall.SIGINT)
@@ -14,6 +15,9 @@ func sigWait() {
 	go watchSignals(sigs)
 }
 
+// watchSignals receives SIGTERM, SIGQUIT and SIGINT syscalls from the channel
+// if the signal is received, control socket will be deleted and
+// a program will be exited with 0 or 2 exit code.
 func watchSignals(sigs chan os.Signal) {
 	for {
 		sig := <-sigs

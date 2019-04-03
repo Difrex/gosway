@@ -14,6 +14,14 @@ const (
 	SOCK_FILE = "/tmp/swaymgr.sock"
 )
 
+// ctlCallback controls layout configuration
+// available commands is:
+// * set: makes layout manageable
+//   receives a layout configuation name
+//   if name is `manual' this command makes the workspace is
+//   non-management
+// * get: returns configuration parameters
+//   currently, it's only support the `layout' argument
 func (m *manager) ctlCallback(callback string) string {
 	ctl := strings.Split(strings.Trim(callback, "\n"), " ")
 	if len(ctl) < 2 {
@@ -31,8 +39,7 @@ func (m *manager) ctlCallback(callback string) string {
 		if _, ok := m.layouts[ctl[1]]; !ok {
 			return "warning: unsupported layout " + ctl[1]
 		}
-		err := m.layouts[ctl[1]].Manage()
-		if err != nil {
+		if err := m.layouts[ctl[1]].Manage(); err != nil {
 			return fmt.Sprintf("error: %s", err.Error())
 		}
 	case "get":
@@ -53,6 +60,7 @@ func (m *manager) ctlCallback(callback string) string {
 	return "success: ok"
 }
 
+// ListenCTL listens a control unix socket
 func (m *manager) ListenCTL() {
 	ln, err := net.Listen("unix", SOCK_FILE)
 	if err != nil {
@@ -83,6 +91,7 @@ func (m *manager) ListenCTL() {
 	}
 }
 
+// SendToCTL sends command from the CLI to the control socket
 func SendToCTL(cmd string) {
 	conn, err := net.Dial("unix", SOCK_FILE)
 	if err != nil {
@@ -98,6 +107,7 @@ func SendToCTL(cmd string) {
 	fmt.Print(s)
 }
 
+// userID returns user ID string
 func userID() string {
 	user, err := user.Current()
 	if err != nil {
@@ -106,6 +116,7 @@ func userID() string {
 	return user.Uid
 }
 
+// cleanUpSocket removes the unix socket file
 func cleanUpSocket() error {
 	return os.Remove(SOCK_FILE)
 }

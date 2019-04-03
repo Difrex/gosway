@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 )
 
+// Output represents structure that we getting from `get_outputs'
 type Output struct {
 	ID                 int           `json:"id,omitempty"`
 	Name               string        `json:"name"`
@@ -35,6 +36,7 @@ type Output struct {
 	Focused            bool          `json:"focused,omitempty"`
 }
 
+// GetActiveOutput returns the currently active and focused output
 func (sc *SwayConnection) GetActiveOutput() (*Output, error) {
 	var output *Output
 	var o []*Output
