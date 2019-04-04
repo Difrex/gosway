@@ -60,7 +60,7 @@ func (l *LeftLayout) PlaceWindow(event *ipc.Event) error {
 		// 	}
 		// 	fmt.Println(string(o2))
 		// } else {
-		// 	fmt.Println("smth went wrong")
+		// 	wfmt.Println("smth went wrong")
 		// }
 	}
 

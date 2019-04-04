@@ -51,7 +51,9 @@ func main() {
 			// Places new window only if the active workspace is managed by the swaymgr
 			wsConfig, isManaged := manager.isWorkspaceManaged()
 			if isManaged {
-				manager.layouts[wsConfig.Layout].PlaceWindow(event)
+				if err := manager.layouts[wsConfig.Layout].PlaceWindow(event); err != nil {
+					fmt.Println("Place error", err)
+				}
 			}
 		}
 	}
