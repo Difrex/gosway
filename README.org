@@ -2,6 +2,8 @@
 
 Golang [[https://github.com/swaywm/sway][Sway]] IPC bindings and autotiling daemon.
 
+Read a blog [[https://difrex.lessmore.pw/post/sway-autotiling/][post]](in Russian).
+
 * ipc
 
 ** Install
