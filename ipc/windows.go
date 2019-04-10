@@ -69,6 +69,29 @@ func (sc *SwayConnection) GetFocusedWorkspaceWindows() ([]Node, error) {
 	return nodes, nil
 }
 
+// GetAllFloatingWindows returns all the floating windows including scratchpads
+func GetAllFloatingWindows(n []Node) []Node {
+	var windows []Node
+
+	for _, node := range n {
+		if len(node.FloatingNodes) > 0 {
+			for _, window := range node.FloatingNodes {
+				windows = append(windows, window)
+			}
+		} else if len(node.Nodes) > 0 {
+			for _, child := range findWindows(node.Nodes) {
+				if len(child.FloatingNodes) > 0 {
+					for _, window := range child.FloatingNodes {
+						windows = append(windows, window)
+					}
+				}
+			}
+		}
+	}
+
+	return windows
+}
+
 // findWindows recusive finding a windows
 func findWindows(n []Node) []Node {
 	var nodes []Node
