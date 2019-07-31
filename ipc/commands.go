@@ -2,6 +2,7 @@ package ipc
 
 import (
 	"bytes"
+	"fmt"
 	"os/exec"
 )
 
@@ -30,4 +31,9 @@ func swaymsg(msg string) ([]byte, error) {
 	}
 
 	return stdout.Bytes(), nil
+}
+
+// Command runs an sway command with the node ID: [con_id]=n.ID com
+func (n Node) Command(com string) ([]byte, error) {
+	return swaymsg(fmt.Sprintf("[con_id=%d] %s", n.ID, com))
 }
