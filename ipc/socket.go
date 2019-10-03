@@ -160,7 +160,7 @@ func NewSwayConnection() (*SwayConnection, error) {
 func GetSocketPath() (string, error) {
 	var path string
 	if !checkSway() {
-		return path, errors.New("Not under the wayland or the Sway executable not found")
+		return path, errors.New("Not under the Wayland or the Sway executable not found")
 	}
 
 	swaysock := os.Getenv("SWAYSOCK")

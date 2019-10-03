@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"strings"
 )
 
 const (
@@ -12,11 +13,15 @@ const (
 
 // checkSway checks wayland session and ensure we under the Sway
 func checkSway() bool {
-	if os.Getenv("WAYLAND_DISPLAY") == "" || os.Getenv("XDG_SESSION_TYPE") != "wayland" {
-		return false
+	swaysock := os.Getenv("SWAYSOCK")
+	if swaysock != "" && strings.HasSuffix(swaysock, ".sock") {
+		return true
 	}
+
 	err := exec.Command(sway, "--version").Run()
-	if err != nil {
+	if err != nil ||
+		os.Getenv("WAYLAND_DISPLAY") == "" ||
+		os.Getenv("XDG_SESSION_TYPE") != "wayland" {
 		return false
 	}
 	return true
