@@ -49,13 +49,13 @@ func (sc *SwayConnection) SubscribeListener(ch chan *Event) {
 		o, err := sc.readSwayResponse()
 		if err != nil {
 			fmt.Println(err)
-			continue
+			panic(err)
 		}
 
 		err = json.Unmarshal(o, &event)
 		if err != nil {
 			fmt.Println(err)
-			continue
+			panic(err)
 		}
 
 		ch <- event
