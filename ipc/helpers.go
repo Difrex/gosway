@@ -11,6 +11,11 @@ const (
 	sway = "sway"
 )
 
+// IsSwayAvailable exported wrapper under the checkSway()
+func IsSwayAvailable() bool {
+	return checkSway()
+}
+
 // checkSway checks wayland session and ensure we under the Sway
 func checkSway() bool {
 	swaysock := os.Getenv("SWAYSOCK")
