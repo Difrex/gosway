@@ -19,8 +19,12 @@ func NewLeftLayout(conn *ipc.SwayConnection, store *store) *LeftLayout {
 	return layout
 }
 
+func (l *LeftLayout) OnFocus(event *ipc.Event) error {
+	return nil
+}
+
 // PlaceWindow ...
-func (l *LeftLayout) PlaceWindow(event *ipc.Event) error {
+func (l *LeftLayout) OnNew(event *ipc.Event) error {
 	nodes, err := l.Conn.GetFocusedWorkspaceWindows()
 	if err != nil {
 		return err

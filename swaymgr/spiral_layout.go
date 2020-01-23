@@ -19,12 +19,17 @@ func NewSpiralLayout(conn *ipc.SwayConnection, store *store) *SpiralLayout {
 	return layout
 }
 
-// PlaceWindow places new container as a spiral
+// OnFocus ...
+func (s *SpiralLayout) OnFocus(event *ipc.Event) error {
+	return s.OnNew(event)
+}
+
+// OnNew places new container as a spiral
 // it's calculates container width and heigh
 // if the layout width is larger than height
 // it splits container by horizontal side
 // else splits it by vertical side
-func (s *SpiralLayout) PlaceWindow(event *ipc.Event) error {
+func (s *SpiralLayout) OnNew(event *ipc.Event) error {
 	nodes, err := s.Conn.GetFocusedWorkspaceWindows()
 	if err != nil {
 		return err

@@ -6,9 +6,11 @@ import (
 
 // Layout is an
 type Layout interface {
-	// PlaceWindow must receive an *ipc.Event
+	// OnNew must receive an *ipc.Event
 	// and do the container manipulation
-	PlaceWindow(*ipc.Event) error
+	OnNew(*ipc.Event) error
+	// OnFocus process the focus event
+	OnFocus(*ipc.Event) error
 	// Manage must store WorkspaceConfig in the database with
 	// the workspace name, layout name and with the Managed: true
 	Manage() error

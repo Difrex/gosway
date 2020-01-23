@@ -32,7 +32,7 @@ func main() {
 	defer cleanUpSocket()
 
 	// Subscribe to new Sway events
-	o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, "[\"window\"]")
+	o, err := manager.listenerConn.SendCommand(ipc.IPC_SUBSCRIBE, `["window"]`)
 	if err != nil {
 		panic(err)
 	}
@@ -43,17 +43,21 @@ func main() {
 	go manager.listenerConn.SubscribeListener(ch)
 
 	// The main loop
-	// Currently, we can process only the "new" type events
 	for {
 		event := <-ch
-		fmt.Println(event.Change)
-		if event.Change == "new" {
-			// Places new window only if the active workspace is managed by the swaymgr
-			wsConfig, isManaged := manager.isWorkspaceManaged()
-			if isManaged {
-				if err := manager.layouts[wsConfig.Layout].PlaceWindow(event); err != nil {
+		wsConfig, isManaged := manager.isWorkspaceManaged()
+		if isManaged {
+			switch event.Change {
+			case "focus":
+				if err := manager.layouts[wsConfig.Layout].OnFocus(event); err != nil {
 					fmt.Println("Place error", err)
 				}
+			case "new":
+				if err := manager.layouts[wsConfig.Layout].OnNew(event); err != nil {
+					fmt.Println("Place error", err)
+				}
+			default:
+				fmt.Printf("Event received: %s\n", event.Change)
 			}
 		}
 	}
