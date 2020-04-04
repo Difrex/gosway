@@ -31,6 +31,10 @@ const (
 	IPC_GET_CONFIG        = 9
 	IPC_SEND_TICK         = 10
 	IPC_SYNC              = 11
+
+	// Sway-specific command types
+	IPC_GET_INPUTS = 100
+	IPC_GET_SEATS  = 101
 )
 
 type SwayConnection struct {
