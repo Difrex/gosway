@@ -41,12 +41,46 @@ type SwayConnection struct {
 	Conn net.Conn
 }
 
+type subscription struct {
+	Chan   chan Event
+	Errors chan error
+}
+
 // SendCommand sends command to the Sway unix socket
 func (sc *SwayConnection) SendCommand(command int, s string) ([]byte, error) {
 	return sc.raw(command, s)
 }
 
+// Subscribe to the sway events
+func (sc *SwayConnection) Subscribe() (*subscription, error) {
+	events := make(chan Event)
+	errors := make(chan error)
+
+	subscription := &subscription{events, errors}
+
+	go func() {
+		for {
+			var event Event
+			o, err := sc.readSwayResponse()
+			if err != nil {
+				errors <- err
+			}
+
+			err = json.Unmarshal(o, &event)
+			if err != nil {
+				errors <- err
+				continue
+			}
+
+			events <- event
+		}
+	}()
+
+	return subscription, nil
+}
+
 // SubscribeListener listens events from the Sway
+// DEPRECATED
 func (sc *SwayConnection) SubscribeListener(ch chan *Event) {
 	for {
 		var event *Event
