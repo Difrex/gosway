@@ -2,19 +2,13 @@
 
 Golang [[https://github.com/swaywm/sway][Sway]] IPC bindings.
 
-[[https://github.com/Difrex/swaymgr][Swaymgr]] moved to the separate project.
-
-Read a blog [[https://difrex.lessmore.pw/post/sway-autotiling/][post]](in Russian).
-
-* ipc
-
-** Install
+* Install
 
 #+begin_src
 go get github.com/Difrex/gosway/ipc
 #+end_src
 
-** Usage
+* Usage
 
 Initialize an new connection to the Sway socket
 #+begin_src go
@@ -61,7 +55,7 @@ for _, window := range windows {
 }
 #+end_src
 
-** Events subscribe
+* Events subscribe
 
 You needs a connection for sending command to the Sway and another one for events listener.
 
