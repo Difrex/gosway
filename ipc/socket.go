@@ -42,8 +42,16 @@ type SwayConnection struct {
 }
 
 type subscription struct {
-	Chan   chan Event
+	Events chan Event
 	Errors chan error
+	quit   chan int
+}
+
+// Close closes the subscription.
+// You need to subscribe again after Close
+// if you want to receive a new events
+func (s *subscription) Close() {
+	s.quit <- 0
 }
 
 // SendCommand sends command to the Sway unix socket
@@ -52,35 +60,37 @@ func (sc *SwayConnection) SendCommand(command int, s string) ([]byte, error) {
 }
 
 // Subscribe to the sway events
-func (sc *SwayConnection) Subscribe() (*subscription, error) {
-	events := make(chan Event)
-	errors := make(chan error)
-
-	subscription := &subscription{events, errors}
+func (sc *SwayConnection) Subscribe() *subscription {
+	subscription := &subscription{make(chan Event), make(chan error), make(chan int)}
 
 	go func() {
 		for {
-			var event Event
-			o, err := sc.readSwayResponse()
-			if err != nil {
-				errors <- err
+			select {
+			case <-subscription.quit:
+				return
+			default:
+				var event Event
+				o, err := sc.readSwayResponse()
+				if err != nil {
+					subscription.Errors <- err
+				}
+
+				err = json.Unmarshal(o, &event)
+				if err != nil {
+					subscription.Errors <- err
+					continue
+				}
+
+				subscription.Events <- event
 			}
 
-			err = json.Unmarshal(o, &event)
-			if err != nil {
-				errors <- err
-				continue
-			}
-
-			events <- event
 		}
 	}()
 
-	return subscription, nil
+	return subscription
 }
 
-// SubscribeListener listens events from the Sway
-// DEPRECATED
+// SubscribeListener DEPRECATED listens events from the Sway
 func (sc *SwayConnection) SubscribeListener(ch chan *Event) {
 	for {
 		var event *Event
@@ -182,12 +192,12 @@ func NewSwayConnection() (*SwayConnection, error) {
 	swayConn := &SwayConnection{}
 	path, err := GetSocketPath()
 	if err != nil {
-		return swayConn, err
+		return nil, err
 	}
 
 	conn, err := net.Dial("unix", path)
 	if err != nil {
-		return swayConn, err
+		return nil, err
 	}
 
 	swayConn.Conn = conn

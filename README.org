@@ -65,20 +65,31 @@ if err != nil {
     panic(err)
 }
 
-listenerConn, err := ipc.NewSwayConnection()
+subCon, err := ipc.NewSwayConnection()
 if err != nil {
     panic(err)
 }
 
-// Run a listener
-ch := make(chan *ipc.Event)
-go subCon.SubscribeListener(ch)
+// Subscribe only to the window related events
+_, err = subCon.SendCommand(ipc.IPC_SUBSCRIBE, `["window"]`)
+if err != nil {
+	panic(err)
+}
+
+// Listen for the events
+s := subCon.Subscribe()
+defer s.Close()
 
 for {
-    event := <-ch
-    if event.Change == "new" {
-        commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
-        commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
-    }
+    select {
+	case event := <-s.Events:
+	    if event.Change == "new" {
+            commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
+            commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
+        }
+    case err := <-s.Errors:
+		fmt.Println("Error:", err)
+		break
+	}
 }
 #+end_src
