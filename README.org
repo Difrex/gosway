@@ -2,19 +2,13 @@
 
 Golang [[https://github.com/swaywm/sway][Sway]] IPC bindings.
 
-[[https://github.com/Difrex/swaymgr][Swaymgr]] moved to the separate project.
-
-Read a blog [[https://difrex.lessmore.pw/post/sway-autotiling/][post]](in Russian).
-
-* ipc
-
-** Install
+* Install
 
 #+begin_src
 go get github.com/Difrex/gosway/ipc
 #+end_src
 
-** Usage
+* Usage
 
 Initialize an new connection to the Sway socket
 #+begin_src go
@@ -61,7 +55,7 @@ for _, window := range windows {
 }
 #+end_src
 
-** Events subscribe
+* Events subscribe
 
 You needs a connection for sending command to the Sway and another one for events listener.
 
@@ -71,20 +65,31 @@ if err != nil {
     panic(err)
 }
 
-listenerConn, err := ipc.NewSwayConnection()
+subCon, err := ipc.NewSwayConnection()
 if err != nil {
     panic(err)
 }
 
-// Run a listener
-ch := make(chan *ipc.Event)
-go subCon.SubscribeListener(ch)
+// Subscribe only to the window related events
+_, err = subCon.SendCommand(ipc.IPC_SUBSCRIBE, `["window"]`)
+if err != nil {
+	panic(err)
+}
+
+// Listen for the events
+s := subCon.Subscribe()
+defer s.Close()
 
 for {
-    event := <-ch
-    if event.Change == "new" {
-        commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
-        commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
-    }
+    select {
+	case event := <-s.Events:
+	    if event.Change == "new" {
+            commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] split h", event.Container.ID))
+            commandConn.RunSwayCommand(fmt.Sprintf("[con_id=%d] move down", event.Container.ID))
+        }
+    case err := <-s.Errors:
+		fmt.Println("Error:", err)
+		break
+	}
 }
 #+end_src
