@@ -2,7 +2,6 @@ package ipc
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -207,8 +206,9 @@ func NewSwayConnection() (*SwayConnection, error) {
 // GetSocketPath returns socket path of the running Sway
 func GetSocketPath() (string, error) {
 	var path string
-	if !checkSway() {
-		return path, errors.New("Not under the Wayland or the Sway executable not found")
+	err := checkSway()
+	if err != nil {
+		return path, fmt.Errorf("not in sway session: %v", err)
 	}
 
 	swaysock := os.Getenv("SWAYSOCK")
@@ -216,7 +216,7 @@ func GetSocketPath() (string, error) {
 		return swaysock, nil
 	}
 
-	path, err := runSwayCMD("--get-socketpath")
+	path, err = runSwayCMD("--get-socketpath")
 	if err != nil {
 		return "", err
 	}
