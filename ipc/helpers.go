@@ -2,9 +2,9 @@ package ipc
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"os/exec"
-	"strings"
 )
 
 const (
@@ -13,23 +13,21 @@ const (
 
 // IsSwayAvailable exported wrapper under the checkSway()
 func IsSwayAvailable() bool {
-	return checkSway()
+	return checkSway() == nil
 }
 
 // checkSway checks wayland session and ensure we under the Sway
-func checkSway() bool {
+func checkSway() error {
 	swaysock := os.Getenv("SWAYSOCK")
-	if swaysock != "" && strings.HasSuffix(swaysock, ".sock") {
-		return true
+	if swaysock == "" {
+		return fmt.Errorf("SWAYSOCK not set")
 	}
 
 	err := exec.Command(sway, "--version").Run()
-	if err != nil ||
-		os.Getenv("WAYLAND_DISPLAY") == "" ||
-		os.Getenv("XDG_SESSION_TYPE") != "wayland" {
-		return false
+	if err != nil {
+		return fmt.Errorf("`sway --version` check failed")
 	}
-	return true
+	return nil
 }
 
 // runSwayCMD runs sway executable with provided args
