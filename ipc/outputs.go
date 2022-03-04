@@ -24,6 +24,7 @@ type Output struct {
 	Sticky             bool          `json:"sticky,omitempty"`
 	Type               string        `json:"type"`
 	Active             bool          `json:"active"`
+	DPMS               bool          `json:"dpms"`
 	Primary            bool          `json:"primary"`
 	Make               string        `json:"make"`
 	Model              string        `json:"model"`
@@ -39,18 +40,13 @@ type Output struct {
 // GetActiveOutput returns the currently active and focused output
 func (sc *SwayConnection) GetActiveOutput() (*Output, error) {
 	var output *Output
-	var o []*Output
-	os, err := sc.SendCommand(IPC_GET_OUTPUTS, "get_ouputs")
+
+	o, err := sc.GetOutputs()
 	if err != nil {
 		return output, err
 	}
 
-	err = json.Unmarshal(os, &o)
-	if err != nil {
-		return output, err
-	}
-
-	for i, _ := range o {
+	for i := range o {
 		if o[i].Focused {
 			output = o[i]
 			break
@@ -58,4 +54,20 @@ func (sc *SwayConnection) GetActiveOutput() (*Output, error) {
 	}
 
 	return output, nil
+}
+
+// GetOutputs returns all outputs
+func (sc *SwayConnection) GetOutputs() ([]*Output, error) {
+	var outputs []*Output
+
+	os, err := sc.SendCommand(IPC_GET_OUTPUTS, "get_outputs")
+	if err != nil {
+		return outputs, err
+	}
+
+	if err := json.Unmarshal(os, &outputs); err != nil {
+		return outputs, err
+	}
+
+	return outputs, nil
 }
