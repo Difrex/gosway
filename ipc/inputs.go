@@ -20,7 +20,7 @@ type inputs []Input
 
 // GetInputs returns all available LibInput devices
 func (sc *SwayConnection) GetInputs() ([]Input, error) {
-	var inputs []Input
+	var inputs inputs
 
 	data, err := sc.SendCommand(IPC_GET_INPUTS, "get_inputs")
 	if err != nil {

@@ -75,15 +75,11 @@ func GetAllFloatingWindows(n []Node) []Node {
 
 	for _, node := range n {
 		if len(node.FloatingNodes) > 0 {
-			for _, window := range node.FloatingNodes {
-				windows = append(windows, window)
-			}
+			windows = append(windows, node.FloatingNodes...)
 		} else if len(node.Nodes) > 0 {
 			for _, child := range findWindows(node.Nodes) {
 				if len(child.FloatingNodes) > 0 {
-					for _, window := range child.FloatingNodes {
-						windows = append(windows, window)
-					}
+					windows = append(windows, child.FloatingNodes...)
 				}
 			}
 		}
@@ -92,7 +88,7 @@ func GetAllFloatingWindows(n []Node) []Node {
 	return windows
 }
 
-// findWindows recusive finding a windows
+// findWindows recursive finding a windows
 func findWindows(n []Node) []Node {
 	var nodes []Node
 
@@ -100,9 +96,7 @@ func findWindows(n []Node) []Node {
 		if node.Name != "" {
 			nodes = append(nodes, node)
 		} else {
-			for _, child := range findWindows(node.Nodes) {
-				nodes = append(nodes, child)
-			}
+			nodes = append(nodes, findWindows(node.Nodes)...)
 		}
 	}
 
@@ -113,7 +107,7 @@ func findWindows(n []Node) []Node {
 func GetLargestWindowID(n []Node) int64 {
 	var id int64
 	var max int
-	for i, _ := range n {
+	for i := range n {
 		if (n[i].Rect.Height + n[i].Rect.Width) > max {
 			max = n[i].Rect.Height + n[i].Rect.Width
 			id = n[i].ID

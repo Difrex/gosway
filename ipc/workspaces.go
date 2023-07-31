@@ -56,7 +56,7 @@ func (sc *SwayConnection) GetFocusedWorkspace() (*Workspace, error) {
 		return name, err
 	}
 
-	for i, _ := range workspaces {
+	for i := range workspaces {
 		if workspaces[i].Focused {
 			name = workspaces[i]
 			break
