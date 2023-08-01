@@ -129,9 +129,7 @@ func (sc *SwayConnection) raw(messageType int, args string) ([]byte, error) {
 	for _, b := range bytetype {
 		message = append(message, b)
 	}
-	for _, b := range payload {
-		message = append(message, b)
-	}
+	message = append(message, payload...)
 
 	_, err := sc.Conn.Write(message)
 	if err != nil {
