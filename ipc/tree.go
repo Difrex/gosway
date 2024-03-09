@@ -182,6 +182,7 @@ type Node struct {
 	Active             bool             `json:"active,omitempty"`
 	Primary            bool             `json:"primary,omitempty"`
 	Visible            bool             `json:"visible,omitempty"`
+	Pid                int              `json:"pid"`
 	Make               string           `json:"make,omitempty"`
 	Model              string           `json:"model,omitempty"`
 	Serial             string           `json:"serial,omitempty"`
