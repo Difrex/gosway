@@ -193,4 +193,5 @@ type Node struct {
 	CurrentMode        CurrentMode      `json:"current_mode,omitempty"`
 	Representation     string           `json:"representation,omitempty"`
 	WindowProperties   WindowProperties `json:"window_properties"`
+	AppID              interface{}      `json:"app_id"`
 }
